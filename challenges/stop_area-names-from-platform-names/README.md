@@ -5,7 +5,7 @@ This script gets all stop_areas without names from the overpass API. It then fet
 ## Maproulette Challenge Description
 
 ```
-Das ist der Mittelpunkt einer Haltestellenrelation. Sie hat selber noch keinen Namen. Alle Steige in dieser Relation (oder zumindest alle, die einen Namen haben), haben den gleichen Namen. Deswegen ist mit hoher Wahrscheinlichkeit davon auszugehen, dass die Haltestelle als ganzes auch so heißt. Wenn der Name sinnvoll erscheint, drücke auf "Yes", um ihn der Haltestellenrelation hinzuzufügen.
+In dieser Challenge bearbeitest du Haltestellenrelationen, die keinen Namen haben. Alle Steige in dieser Relation (oder zumindest alle, die einen Namen haben), haben den gleichen Namen. Deswegen ist mit hoher Wahrscheinlichkeit davon auszugehen, dass die Haltestelle als ganzes auch so heißt. Wenn der Name sinnvoll erscheint, drücke auf "Yes", um ihn der Haltestellenrelation hinzuzufügen.
 
 ```
 
