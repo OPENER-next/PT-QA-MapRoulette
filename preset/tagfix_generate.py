@@ -125,6 +125,6 @@ for element in data['elements']:
 with open('tasks.json', 'w', encoding="UTF-8") as f:
     for task in TASKS:
         f.write('\x1E')
-        f.write(json.dumps(task, ensure_ascii=False))
+        json.dump(task, f, ensure_ascii=False)
         f.write('\n')
 

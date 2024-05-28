@@ -126,6 +126,5 @@ with open('tasks.json', 'w', encoding="UTF-8") as f:
     for task in TASKS:
         f.write('\x1E')
         json.dump(task, f, ensure_ascii=False)
-        #f.write(json.dumps(task, ensure_ascii=False))
         f.write('\n')
 
