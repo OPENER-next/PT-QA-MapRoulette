@@ -3,13 +3,13 @@ import urllib.parse
 import requests
 import re
 # Imports that are specific to this challenge
-import relationcheck
+
 
 
 # Use this function to determine if a task needs to be created for a given element
 # use this function for filtering things that overpass cannot filter
 def needsTask(e):
-    return relationcheck.check_relation_for_consistent_platform_names(e['id'])
+    return True
 
 ## Helper functions
 
@@ -54,10 +54,29 @@ def correct_mangled_characters(input_string):
 TASKS = []
 
 overpass_query = """
-[out:json][timeout:25];
+[out:json][timeout:250];
 area(id:3600051477)->.searchArea;
-relation["public_transport"="stop_area"][!"name"](area.searchArea);
-out ids center;
+rel["public_transport"="stop_area"][!"name"](area.searchArea)->.stop_areas;
+// for each stop area
+foreach.stop_areas -> .stop_area {
+  // recurse relation fully down (select all ancestors)
+  // required to construct the full geometry for relations that contain other relations
+  // and to get members of type relation (single > only returns ways and nodes)
+  .stop_area >>;
+  nwr._["public_transport"="platform"];
+  
+  if (u(t["name"]) != "< multiple values found >" && u(t["name"]) != "") {
+  	make StopArea
+      name=u(t["name"]),
+      // get stop are relation id
+      ::id=stop_area.u(id()),
+      // group geometries into one
+      ::geom=hull(gcat(geom()));
+      
+      out center tags;
+  }
+}
+
 """
 
 # URL encode the query and get the Data from the overpass API
@@ -77,8 +96,8 @@ for element in data['elements']:
             element['lat'] = element['lat']
             element['lon'] = element['lon']
         else:
-            element['lat'] = element['center']['lat']
-            element['lon'] = element['center']['lon']
+            element['lat'] = element['geometry']['coordinates'][0]
+            element['lon'] = element['geometry']['coordinates'][1]
         # Create a Task for the element
         task = {
             "type": "FeatureCollection",
@@ -90,7 +109,7 @@ for element in data['elements']:
                         "coordinates": [element['lon'], element['lat']]
                     },
                     "properties": {
-                        "@id": f"{element['type']}/{element['id']}",
+                        "@id": f"relation/{element['id']}",
                         "latitude": element['lat'],
                         "longitude": element['lon'],
                         #"name": element.get('tags', {}).get('name', 'Unnamed')
@@ -106,12 +125,12 @@ for element in data['elements']:
                     {
                         "operationType": "modifyElement",
                         "data": {
-                            "id": f"{element['type']}/{element['id']}",
+                            "id": f"relation/{element['id']}",
                             "operations": [
                                 {
                                     "operation": "setTags",
                                     "data": {
-                                        "name": correct_mangled_characters(value)
+                                        "name": element['tags']['name']
                                     }
                                 }
                             ]
