@@ -24,8 +24,6 @@ for line in dizydata:
     # Get the necessary data from the json
     osmfullid = data["features"][0]["properties"]["@id"]
     ## Hack while the MR fix is not deployed - skip this task if the osmid contains relation
-    if "relation" in osmfullid:
-        continue
     dhid = data["features"][0]["properties"]["zhv-dhid"]
     # Modify the json to include the cooperative work
     data["cooperativeWork"] = {
