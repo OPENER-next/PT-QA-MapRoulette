@@ -96,8 +96,8 @@ for element in data['elements']:
             element['lat'] = element['lat']
             element['lon'] = element['lon']
         else:
-            element['lat'] = element['geometry']['coordinates'][0]
-            element['lon'] = element['geometry']['coordinates'][1]
+            element['lat'] = element['geometry']['coordinates'][1]
+            element['lon'] = element['geometry']['coordinates'][0]
         # Create a Task for the element
         task = {
             "type": "FeatureCollection",
