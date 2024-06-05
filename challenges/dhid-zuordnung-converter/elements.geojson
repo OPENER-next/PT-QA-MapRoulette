@@ -1,0 +1,42 @@
+[
+  {
+    "type": "Feature",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          12.9236379,
+          50.8156477
+        ],
+        [
+          12.9236603,
+          50.8158259
+        ]
+      ]
+    },
+    "properties": {
+      "id": "439562400",
+      "type": "way"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          12.9234389,
+          50.8167424
+        ],
+        [
+          12.923446,
+          50.816563
+        ]
+      ]
+    },
+    "properties": {
+      "id": "504244349",
+      "type": "way"
+    }
+  }
+]
