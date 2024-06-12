@@ -28,10 +28,11 @@ class GeoFeature:
 			print(geometry)
 			raise ValueError("Invalid coordinates")
 
-		@classmethod
-		def withId(cls, osmType, osmId, geometry, properties = {}):
-			properties["@id"] = str(osmType) + "/" + str(osmId)
-			return cls(geometry, properties)
+	@classmethod
+	def withId(cls, osmType, osmId, geometry, properties):
+		print(osmType, osmId, geometry, properties)
+		properties["@id"] = str(osmType) + "/" + str(osmId)
+		return cls(geometry, properties)
 
 	def to_dict(self):
 		return {
@@ -42,6 +43,10 @@ class GeoFeature:
 			},
 			"properties": self.properties
 		}
+
+	def convertPolygonToClosedString(self):
+		if self.geometryType == "Polygon":
+			self.geometryType = "LineString"
 
 @dataclass
 class TagFix():

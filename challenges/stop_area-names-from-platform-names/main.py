@@ -1,6 +1,6 @@
 import sys
 sys.path.append('../../include')
-import MRFactory as mrf
+import MRChallengeBuilder as mrcb
 
 opQuery = """
 [out:json][timeout:250];
@@ -27,24 +27,24 @@ foreach.stop_areas -> .stop_area {
 }
 """
 
-op = mrf.Overpass()
+op = mrcb.Overpass()
 resultElements = op.getElementsFromQuery(opQuery)
 
-challenge = mrf.Challenge()
+challenge = mrcb.Challenge()
 
 for element in resultElements:
-	centerPoint = mrf.getElementCenterPoint(element)
-	mainFeature = mrf.MainGeoFeature(
+	centerPoint = mrcb.getElementCenterPoint(element)
+	mainFeature = mrcb.GeoFeature.withId(
 		osmType="relation", 
 		osmId=element["id"],
 		geometry=centerPoint, 
 		properties={})
 	suggestedName = element["tags"]["name"]
-	cooperativeWork = mrf.TagFix(
+	cooperativeWork = mrcb.TagFix(
 		osmType="relation", 
 		osmId=element["id"], 
 		tags={"name": suggestedName})
-	t = mrf.Task(
+	t = mrcb.Task(
 		mainFeature=mainFeature, 
 		additionalFeatures=[], 
 		cooperativeWork=cooperativeWork)

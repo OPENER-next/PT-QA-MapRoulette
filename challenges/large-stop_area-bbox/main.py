@@ -1,6 +1,6 @@
 import sys, math
 sys.path.append('../../include')
-import MRFactory as mrf
+import MRChallengeBuilder as mrcb
 
 ## Functions specific to this challenge
 
@@ -42,26 +42,27 @@ relation["public_transport"="stop_area"]["operator"!~"DB"]["train"!="yes"]["rail
 out bb ids;
 """
 
-op = mrf.Overpass()
+op = mrcb.Overpass()
 resultElements = op.getElementsFromQuery(opQuery)
 
-challenge = mrf.Challenge()
+challenge = mrcb.Challenge()
 
 for element in resultElements:
-	if needsTask(element):
-		bboxGeometry = mrf.getElementGeometry(element)
-		print(bboxGeometry)
-		mainFeature = mrf.MainGeoFeature(
-			geometry=bboxGeometry, 
-			properties={}, 
-			osmType="relation", 
-			osmId=element["id"])
-		t = mrf.Task(
-			mainFeature=mainFeature, 
-			additionalFeatures=[], 
-			cooperativeWork=None)
-		challenge.addTask(t)
+    if needsTask(element):
+        bboxGeometry = mrcb.getElementGeometry(element)
+        print(bboxGeometry)
+        mainFeature = mrcb.GeoFeature.withId(
+            osmType="relation", 
+            osmId=element["id"],
+            geometry=bboxGeometry, 
+            properties={})
+        mainFeature.convertPolygonToClosedString()
+        t = mrcb.Task(
+            mainFeature=mainFeature, 
+            additionalFeatures=[], 
+            cooperativeWork=None)
+        challenge.addTask(t)
 
 challenge.saveToFile("large_stop_area_bbox.json")
 
-	
+    
