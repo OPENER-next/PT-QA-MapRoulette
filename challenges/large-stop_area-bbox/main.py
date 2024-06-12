@@ -38,7 +38,7 @@ def needsTask(e):
 opQuery = """
 [out:json][timeout:250];
 area(id:3600051477)->.searchArea;
-relation["public_transport"="stop_area"]["operator"!~"DB"]["train"!="yes"]["railway"!="facility"](area.searchArea);
+relation["public_transport"="stop_area"](area.searchArea);
 out bb ids;
 """
 
