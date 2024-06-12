@@ -1,3 +1,5 @@
 
 data.osm
 *.pyc
+*.csv
+include/creds.json

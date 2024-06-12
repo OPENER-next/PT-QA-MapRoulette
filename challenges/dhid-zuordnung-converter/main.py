@@ -1,9 +1,10 @@
-import json
+import json, sys
 import urllib.parse
 import requests
 # Imports that are specific to this challenge
 import get_elements_around as gea
-
+sys.path.append('../../include')
+import ZHVHelper as zhvh 
 # Use this function to determine if a task needs to be created for a given element
 # use this function for filtering things that overpass cannot filter, maybe by using a function from a different file that you specifically implemented for this task
 # if your overpass query already returns all elements that need to be fixed, make this function return True
@@ -11,9 +12,14 @@ def needsTask(e):
     return True
 
 
+
 TASKS = []
 
-response = requests.get('ENTER_URL_HERE')
+zhv = zhvh.ZHV("../../include/data.csv")
+
+creds = json.load(open('../../include/creds.json'))
+
+response = requests.get(creds["dizy-url"])
 dizydata = response.text.split('\n')
 # remove the last line, which is empty
 dizydata.pop()
@@ -61,22 +67,22 @@ for line in dizydata:
     else:
         lon = data["features"][0]["geometry"]["coordinates"][0][0]
         lat = data["features"][0]["geometry"]["coordinates"][0][1]
-    nearby_platform_features = gea.get_elements_around((lat, lon), {"public_transport": "platform", "highway": "bus_stop", "railway": "platform"}, 0.001)
-    for feature in nearby_platform_features:
-        # If the feature is a node, check if there is any other node with the same coordinates (when coordinates are truncated to 4 decimal places)
-        # Only add the feature if there is NOT another node with the same coordinates
-        if feature["geometry"]["type"] == "Point":
-            # iterate over all features in the list, and if a feature is a point, check if it has the same coordinates (truncated to 4 decimal places)
-            # if it does, then skip this feature
-            skip = False
-            for f in data["features"]:
-                if f["geometry"]["type"] == "Point":
-                    if round(f["geometry"]["coordinates"][0], 4) == round(feature["geometry"]["coordinates"][0], 4) and round(f["geometry"]["coordinates"][1], 4) == round(feature["geometry"]["coordinates"][1], 4):
-                        skip = True
-                        break
-            if skip:
-                continue
         data["features"].append(feature)
+    zhv_markers_in_area = zhv.get_data_in_bbox(lat - 0.0005, lon - 0.0005, lat + 0.0005, lon + 0.0005)
+    for marker in zhv_markers_in_area:
+        feature = {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [marker[6], marker[5]]
+            },
+            "properties": {
+                "color": "gray",
+            }
+        }
+        data["features"].append(feature)
+
+
     TASKS.append(data)
     # Now, dump the task to a geojson file
     with open('tasks.json', 'w', encoding="UTF-8") as f:
