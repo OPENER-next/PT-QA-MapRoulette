@@ -35,10 +35,10 @@ challenge = mrf.Challenge()
 for element in resultElements:
 	centerPoint = mrf.getElementCenterPoint(element)
 	mainFeature = mrf.MainGeoFeature(
-		geometry=centerPoint, 
-		properties={}, 
 		osmType="relation", 
-		osmId=element["id"])
+		osmId=element["id"],
+		geometry=centerPoint, 
+		properties={})
 	suggestedName = element["tags"]["name"]
 	cooperativeWork = mrf.TagFix(
 		osmType="relation", 

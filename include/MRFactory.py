@@ -28,6 +28,11 @@ class GeoFeature:
 			print(geometry)
 			raise ValueError("Invalid coordinates")
 
+		@classmethod
+		def withId(cls, osmType, osmId, geometry, properties = {}):
+			properties["@id"] = str(osmType) + "/" + str(osmId)
+			return cls(geometry, properties)
+
 	def to_dict(self):
 		return {
 			"type": "Feature",
@@ -36,29 +41,6 @@ class GeoFeature:
 				"coordinates": self.geometry
 			},
 			"properties": self.properties
-		}
-
-@dataclass
-class MainGeoFeature(GeoFeature):
-	# A main geo feature is a geo feature that has an osm id and a osm type
-	# The osm id is a int
-	# The osm type is a string
-	def __init__(self, geometry, properties, osmType, osmId):
-		super().__init__(geometry, properties)
-		self.osmId = osmId
-		self.osmType = osmType
-
-	def to_dict(self):
-		return {
-			"type": "Feature",
-			"geometry": {
-				"type": self.geometryType,
-				"coordinates": self.geometry
-			},
-			"properties": {
-				"@id": str(self.osmType) + "/" + str(self.osmId),
-				**self.properties
-			}
 		}
 
 @dataclass
