@@ -77,7 +77,8 @@ for line in dizydata:
                 "coordinates": [marker[6], marker[5]]
             },
             "properties": {
-                "color": "gray",
+                "marker-size": "small",
+                "marker-color": "#555555",
             }
         }
         data["features"].append(feature)
