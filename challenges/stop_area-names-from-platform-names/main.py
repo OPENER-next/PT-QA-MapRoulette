@@ -15,7 +15,7 @@ foreach.stop_areas -> .stop_area {
   nwr._["public_transport"="platform"];
   
   if (u(t["name"]) != "< multiple values found >" && u(t["name"]) != "") {
-  	make StopArea
+      make StopArea
       name=u(t["name"]),
       // get stop are relation id
       ::id=stop_area.u(id()),
@@ -33,21 +33,21 @@ resultElements = op.getElementsFromQuery(opQuery)
 challenge = mrcb.Challenge()
 
 for element in resultElements:
-	centerPoint = mrcb.getElementCenterPoint(element)
-	mainFeature = mrcb.GeoFeature.withId(
-		osmType="relation", 
-		osmId=element["id"],
-		geometry=centerPoint, 
-		properties={})
-	suggestedName = element["tags"]["name"]
-	cooperativeWork = mrcb.TagFix(
-		osmType="relation", 
-		osmId=element["id"], 
-		tags={"name": suggestedName})
-	t = mrcb.Task(
-		mainFeature=mainFeature, 
-		additionalFeatures=[], 
-		cooperativeWork=cooperativeWork)
-	challenge.addTask(t)
+    centerPoint = mrcb.getElementCenterPoint(element)
+    mainFeature = mrcb.GeoFeature.withId(
+        osmType="relation", 
+        osmId=element["id"],
+        geometry=centerPoint, 
+        properties={})
+    suggestedName = element["tags"]["name"]
+    cooperativeWork = mrcb.TagFix(
+        osmType="relation", 
+        osmId=element["id"], 
+        tags={"name": suggestedName})
+    t = mrcb.Task(
+        mainFeature=mainFeature, 
+        additionalFeatures=[], 
+        cooperativeWork=cooperativeWork)
+    challenge.addTask(t)
 
 challenge.saveToFile("stop_area_names_from_platform_names.json")
