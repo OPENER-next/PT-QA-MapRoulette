@@ -1,6 +1,6 @@
 import sys
 sys.path.append('../../include')
-import MRChallengeBuilder as mrcb
+import challenge_builder as mrcb
 
 opQuery = """
 [out:json][timeout:250];

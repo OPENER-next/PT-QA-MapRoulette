@@ -1,6 +1,6 @@
 import sys, math
 sys.path.append('../../include')
-import MRChallengeBuilder as mrcb
+import challenge_builder as mrcb
 
 ## Functions specific to this challenge
 
