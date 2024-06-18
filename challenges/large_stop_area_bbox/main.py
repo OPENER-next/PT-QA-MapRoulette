@@ -1,20 +1,9 @@
 import sys, math
 sys.path.append('../../shared')
 import challenge_builder as mrcb
+from geopy import distance
 
 ## Functions specific to this challenge
-
-def get_distance_from_coordinates(lat1, lon1, lat2, lon2):
-    R = 6371000  # Radius of the Earth in meters
-    lat1 = math.radians(lat1)
-    lon1 = math.radians(lon1)
-    lat2 = math.radians(lat2)
-    lon2 = math.radians(lon2)
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-    a = math.sin(dlat / 2) * math.sin(dlat / 2) + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) * math.sin(dlon / 2)
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    return R * c
 
 # Use this function to determine if a task needs to be created for a given element
 # use this function for filtering things that overpass cannot filter, maybe by using a function from a different file that you specifically implemented for this task
@@ -30,10 +19,11 @@ def needsTask(e):
     e['bounds']['minlon'] = e['geometry']['coordinates'][0][0]
     e['bounds']['maxlat'] = e['geometry']['coordinates'][2][1]
     e['bounds']['maxlon'] = e['geometry']['coordinates'][2][0]
-    lon_diff = get_distance_from_coordinates(e['bounds']['minlat'], e['bounds']['minlon'], e['bounds']['minlat'], e['bounds']['maxlon'])
+    # Calculate the length of the longitude difference of the bbox
+    lon_diff = distance.distance((e['bounds']['minlat'], e['bounds']['minlon']), (e['bounds']['minlat'], e['bounds']['maxlon'])).m
     # Calculate the length of the latitude difference of the bbox
-    lat_diff = get_distance_from_coordinates(e['bounds']['minlat'], e['bounds']['minlon'], e['bounds']['maxlat'], e['bounds']['minlon'])
-    # If either the longitude or the latitude difference is longer than 100 meters, return the name of the element
+    lat_diff = distance.distance((e['bounds']['minlat'], e['bounds']['minlon']), (e['bounds']['maxlat'], e['bounds']['minlon'])).m
+    # If either the longitude or the latitude difference is longer than 1000 meters, return the name of the element
     print(lon_diff, lat_diff)
     if lon_diff > max_distance or lat_diff > max_distance:
         return True
@@ -69,9 +59,7 @@ for element in resultElements:
             properties={})
         mainFeature.convertClosedStringToPolygon()
         t = mrcb.Task(
-            mainFeature=mainFeature, 
-            additionalFeatures=[], 
-            cooperativeWork=None)
+            mainFeature=mainFeature)
         challenge.addTask(t)
 
 challenge.saveToFile("large_stop_area_bbox.json")
