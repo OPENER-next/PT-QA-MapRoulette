@@ -1,5 +1,5 @@
 import sys, math
-sys.path.append('../../include')
+sys.path.append('../../shared')
 import challenge_builder as mrcb
 
 ## Functions specific to this challenge
