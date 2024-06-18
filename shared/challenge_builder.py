@@ -97,9 +97,10 @@ class Task:
 
     def toGeoJSON(self):
         # the features are the main feature and the additional features as one list
-        features = [self.mainFeature.toGeoJSON()]
-        for feature in self.additionalFeatures:
-            features.append(feature.toGeoJSON())
+        features = [
+            self.mainFeature.toGeoJSON(),
+            *map(lambda f: f.toGeoJSON(), self.additionalFeatures)
+            ]
         if self.cooperativeWork == None:
             return {
                 "type": "FeatureCollection",
