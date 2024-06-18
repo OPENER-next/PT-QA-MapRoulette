@@ -3,3 +3,4 @@ data.osm
 *.pyc
 *.csv
 include/creds.json
+challenges/large_stop_area_bbox/large_stop_area_bbox.json

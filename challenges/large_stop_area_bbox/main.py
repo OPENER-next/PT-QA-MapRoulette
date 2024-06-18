@@ -25,6 +25,11 @@ def needsTask(e):
     # An element needs a task if either the vertical or the horizontal bbox edge is longer than a predefinded value in meters
     max_distance = 1000
     # Calculate the length of the longitude difference of the bbox
+    e['bounds'] = {}
+    e['bounds']['minlat'] = e['geometry']['coordinates'][0][1]
+    e['bounds']['minlon'] = e['geometry']['coordinates'][0][0]
+    e['bounds']['maxlat'] = e['geometry']['coordinates'][2][1]
+    e['bounds']['maxlon'] = e['geometry']['coordinates'][2][0]
     lon_diff = get_distance_from_coordinates(e['bounds']['minlat'], e['bounds']['minlon'], e['bounds']['minlat'], e['bounds']['maxlon'])
     # Calculate the length of the latitude difference of the bbox
     lat_diff = get_distance_from_coordinates(e['bounds']['minlat'], e['bounds']['minlon'], e['bounds']['maxlat'], e['bounds']['minlon'])
@@ -39,7 +44,13 @@ opQuery = """
 [out:json][timeout:250];
 area(id:3600051477)->.searchArea;
 relation["public_transport"="stop_area"](area.searchArea);
-out bb ids;
+foreach {
+  >> -> .ancestors;
+  make myCustomElement
+    ::id=min(id()),
+  	::geom=ancestors.gcat(geom());
+  out bb;
+}
 """
 
 op = mrcb.Overpass()
