@@ -34,7 +34,7 @@ class GeoFeature:
         properties["@id"] = str(osmType) + "/" + str(osmId)
         return cls(geometry, properties)
 
-    def to_dict(self):
+    def toGeoJSON(self):
         return {
             "type": "Feature",
             "geometry": {
@@ -69,7 +69,7 @@ class TagFix():
         if not isinstance(self.tagsToSet, dict):
             raise ValueError("tagsToSet must be a dict e.g. {'tag1': 'value1', 'tag2': 'value2'}")
         
-    def to_dict(self):
+    def toGeoJSON(self):
         return {"meta": 
             {"version": 2, "type": 1}, 
             "operations": [
@@ -95,11 +95,11 @@ class Task:
         self.additionalFeatures = additionalFeatures
         self.cooperativeWork = cooperativeWork
 
-    def to_dict(self):
+    def toGeoJSON(self):
         # the features are the main feature and the additional features as one list
-        features = [self.mainFeature.to_dict()]
+        features = [self.mainFeature.toGeoJSON()]
         for feature in self.additionalFeatures:
-            features.append(feature.to_dict())
+            features.append(feature.toGeoJSON())
         if self.cooperativeWork == None:
             return {
                 "type": "FeatureCollection",
@@ -109,7 +109,7 @@ class Task:
             return {
                 "type": "FeatureCollection",
                 "features": features,
-                "cooperativeWork": self.cooperativeWork.to_dict()
+                "cooperativeWork": self.cooperativeWork.toGeoJSON()
             }
 
 @dataclass
@@ -124,7 +124,7 @@ class Challenge:
         with open(filename, 'w', encoding="UTF-8") as f:
             for task in self.tasks:
                 f.write('\x1E')
-                json.dump(task.to_dict(), f, ensure_ascii=False)
+                json.dump(task.toGeoJSON(), f, ensure_ascii=False)
                 f.write('\n')
 
 class Overpass:
