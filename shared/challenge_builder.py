@@ -101,17 +101,11 @@ class Task:
             self.mainFeature.toGeoJSON(),
             *map(lambda f: f.toGeoJSON(), self.additionalFeatures)
             ]
-        if self.cooperativeWork == None:
-            return {
-                "type": "FeatureCollection",
-                "features": features,
-            }
-        else:
-            return {
-                "type": "FeatureCollection",
-                "features": features,
-                "cooperativeWork": self.cooperativeWork.toGeoJSON()
-            }
+        return {
+            "type": "FeatureCollection",
+            "features": features,
+            **({"cooperativeWork": self.cooperativeWork.toGeoJSON()} if self.cooperativeWork != None else {})
+        }
 
 @dataclass
 class Challenge:
