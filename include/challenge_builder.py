@@ -177,6 +177,9 @@ def createGeometryFromElement(element):
     if "lat" in element:
         # list of 2 floats for a dict that has lat lon as keys
         element["simpleGeometry"] = [element["lon"], element["lat"]]
+    elif "geometry" in element and "coordinates" in element["geometry"]:
+        # list of lists of 2 floats for a dict that has lat lon as keys
+        element["simpleGeometry"] = element["geometry"]["coordinates"]
     elif "geometry" in element:
         # list of lists of 2 floats for a dict that has lat lon as keys
         element["simpleGeometry"] = [[point["lon"], point["lat"]] for point in element["geometry"]]
