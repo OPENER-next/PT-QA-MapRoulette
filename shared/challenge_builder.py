@@ -124,7 +124,6 @@ class Challenge:
 
 class Overpass:
     def __init__(self, overpass_url = "https://overpass-api.de/api/interpreter"):
-        self.resultElements = {}
         self.overpass_url = overpass_url
 
     def getElementsFromQuery(self, overpass_query):
