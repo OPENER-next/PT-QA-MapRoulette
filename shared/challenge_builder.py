@@ -123,9 +123,9 @@ class Challenge:
                 f.write('\n')
 
 class Overpass:
-    def __init__(self):
+    def __init__(self, overpass_url = "https://overpass-api.de/api/interpreter"):
         self.resultElements = {}
-        self.overpass_url = "https://overpass-api.de/api/interpreter"
+        self.overpass_url = overpass_url
 
     def getElementsFromQuery(self, overpass_query):
         response = requests.get(self.overpass_url, params={'data': overpass_query})
