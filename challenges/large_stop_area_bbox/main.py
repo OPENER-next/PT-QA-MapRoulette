@@ -67,7 +67,7 @@ for element in resultElements:
             osmId=element["id"],
             geometry=bboxGeometry, 
             properties={})
-        mainFeature.convertPolygonToClosedString()
+        mainFeature.convertClosedStringToPolygon()
         t = mrcb.Task(
             mainFeature=mainFeature, 
             additionalFeatures=[], 

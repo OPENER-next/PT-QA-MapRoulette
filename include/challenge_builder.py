@@ -18,7 +18,7 @@ class GeoFeature:
         # if its a list of lists of 2 numbers where start and end are the same, its a Polygon
         if isinstance(geometry, list):
             if isinstance(geometry[0], list):
-                if geometry[0][0] == geometry[-1][0] and geometry[0][1] == geometry[-1][1]:
+                if isinstance(geometry[0][0], list):
                     self.geometryType = "Polygon"
                 else:
                     self.geometryType = "LineString"
@@ -45,8 +45,16 @@ class GeoFeature:
         }
 
     def convertPolygonToClosedString(self):
-        if self.geometryType == "Polygon":
-            self.geometryType = "LineString"
+        if self.geometryType != "Polygon":
+            raise ValueError("This function only works for Polygons")
+        self.geometryType = "LineString"
+        self.geometry = self.geometry[0]
+
+    def convertClosedStringToPolygon(self):
+        if self.geometryType != "LineString":
+            raise ValueError("This function only works for LineStrings")
+        self.geometryType = "Polygon"
+        self.geometry = [self.geometry]
 
 @dataclass
 class TagFix():
