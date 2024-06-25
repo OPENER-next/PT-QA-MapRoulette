@@ -34,8 +34,8 @@ jobs:
 
     - name: Move JSON files to artifacts
       run: |
-        mv challenges/large_stop_area_bbox/large_stop_area_bbox.json artifacts/
-        mv challenges/stop_area_names_from_platform_names/stop_area_names_from_platform_names.json artifacts/
+        mv large_stop_area_bbox.json artifacts/
+        mv stop_area_names_from_platform_names.json artifacts/
 
     - name: Create Release
       id: create_release
