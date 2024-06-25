@@ -26,7 +26,6 @@ def needsTask(e):
     # Calculate the length of the latitude difference of the bbox
     lat_diff = distance.distance((e['bounds']['minlat'], e['bounds']['minlon']), (e['bounds']['maxlat'], e['bounds']['minlon'])).m
     # If either the longitude or the latitude difference is longer than 1000 meters, return the name of the element
-    print(lon_diff, lat_diff)
     if lon_diff > max_distance or lat_diff > max_distance:
         return True
 
