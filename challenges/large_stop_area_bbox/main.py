@@ -2,7 +2,7 @@ import sys, math
 #sys.path.append('../../shared')
 #from ..shared import challenge_builder as mrcb
 #import challenge_builder as mrcb
-from shared import challenge_builder as mrcb
+import shared.challenge_builder as mrcb
 from geopy import distance
 
 ## Functions specific to this challenge

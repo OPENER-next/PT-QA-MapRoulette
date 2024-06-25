@@ -22,10 +22,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Set PYTHONPATH
-      run: echo "PYTHONPATH=$PYTHONPATH;/home/runner/work/PT-QA-MapRoulette/PT-QA-MapRoulette/shared" >> $GITHUB_ENV
-      
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi  
     - name: Run large_stop_area_bbox script
       run: python challenges/large_stop_area_bbox/main.py
 
