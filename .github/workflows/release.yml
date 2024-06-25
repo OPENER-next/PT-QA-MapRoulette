@@ -49,12 +49,22 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Upload Release Assets
+    - name: Upload large_stop_area_bbox JSON
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: artifacts/*.json
-        asset_name: json_files.zip
-        asset_content_type: application/zip
+        asset_path: artifacts/large_stop_area_bbox.json
+        asset_name: large_stop_area_bbox.json
+        asset_content_type: application/json
+
+    - name: Upload stop_area_names_from_platform_names JSON
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: artifacts/stop_area_names_from_platform_names.json
+        asset_name: stop_area_names_from_platform_names.json
+        asset_content_type: application/json
