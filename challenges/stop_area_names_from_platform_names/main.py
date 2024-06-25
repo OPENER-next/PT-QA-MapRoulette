@@ -1,5 +1,5 @@
 import sys
-sys.path.append('../../shared')
+sys.path.append('shared')
 import challenge_builder as mrcb
 
 opQuery = """
