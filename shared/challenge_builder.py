@@ -4,6 +4,103 @@ from typing import List, Dict
 import requests
 
 @dataclass
+class Geometry:
+    # This is an abstraction of a GeoJSON Geometry
+    # A geometry is a dict with a type and coordinates
+    # The type is a string and the coordinates are a list of lists of numbers
+    def __init__(self, type, coordinates):
+        self.type = type
+        self.coordinates = coordinates
+
+    # A method that will take an overpass result element and extract the geometry from it depending on what kind of data it is
+    # The type of the geometry can be given in the arguments, but will default be inferred from the coordinates
+    # This element can be a lot of different things...
+    @classmethod
+    def fromOverpassElement(cls, element, GeomType = None):
+        if GeomType == None:
+            if 'lat' in element:
+                GeomType = "Point"
+            elif 'center' in element:
+                GeomType = "Point"
+            elif 'bounds' in element:
+                if GeomType == None:
+                    GeomType = "Polygon"
+            elif 'geometry' in element:
+                if element['geometry']['type'] == 'Point':
+                    GeomType = "Point"
+                elif element['geometry']['type'] == 'LineString':
+                    GeomType = "LineString"
+                elif element['geometry']['type'] == 'Polygon':
+                    GeomType = "Polygon"
+            else:
+                raise ValueError("No handalable coordinates found for element")
+        
+        if GeomType == "Point":
+            return cls(GeomType, [element['lon'], element['lat']])
+        elif 'bounds' in element:
+            # The geometry that needs to be initialized changes depending on if the user specifically requested a certain format
+            # A LineString is a list of lists of 2 numbers
+            # A Polygon is a list with one element: a list of lists of 2 numbers
+            if GeomType == "LineString":
+                return cls(GeomType, [
+                    [element['bounds']['minlon'], element['bounds']['minlat']],
+                    [element['bounds']['minlon'], element['bounds']['maxlat']],
+                    [element['bounds']['maxlon'], element['bounds']['maxlat']],
+                    [element['bounds']['maxlon'], element['bounds']['minlat']],
+                    [element['bounds']['minlon'], element['bounds']['minlat']]
+                ])
+            elif GeomType == "Polygon":
+                return cls(GeomType, [
+                    [[element['bounds']['minlon'], element['bounds']['minlat']],
+                    [element['bounds']['minlon'], element['bounds']['maxlat']],
+                    [element['bounds']['maxlon'], element['bounds']['maxlat']],
+                    [element['bounds']['maxlon'], element['bounds']['minlat']],
+                    [element['bounds']['minlon'], element['bounds']['minlat']]]
+                ])
+        elif GeomType == "LineString":
+            return cls(GeomType, [[point['lon'], point['lat']] for point in element['geometry']])
+        elif GeomType == "Polygon":
+            return cls(GeomType, [[[point['lon'], point['lat']] for point in element['geometry']]])
+        
+    def toGeoJSON(self):
+        return {
+            "type": self.type,
+            "coordinates": self.coordinates
+        }
+
+    def convertPolygonToClosedString(self):
+        if self.type != "Polygon":
+            raise ValueError("This function only works for Polygons")
+        self.type = "LineString"
+        self.coordinates = self.coordinates[0]
+
+    def convertClosedStringToPolygon(self):
+        if self.type != "LineString":
+            raise ValueError("This function only works for LineStrings")
+        self.type = "Polygon"
+        self.coordinates = [self.coordinates]
+
+    def getCenterPoint(self):
+        if self.type == "Point":
+            return self.coordinates
+        elif self.type == "LineString":
+            # Create a center point as an average of all points
+            lat = 0
+            lon = 0
+            for point in self.coordinates:
+                lat += point[1]
+                lon += point[0]
+            return [lon / len(self.coordinates), lat / len(self.coordinates)]
+        elif self.type == "Polygon":
+            # Create a center point as an average of all points
+            lat = 0
+            lon = 0
+            for point in self.coordinates[0]:
+                lat += point[1]
+                lon += point[0]
+            return [lon / len(self.coordinates[0]), lat / len(self.coordinates[0])]
+
+@dataclass
 class GeoFeature:
     # This is an abstraction of a GeoJSON Feature
     # A geo feature is a feature that has a geometry and properties

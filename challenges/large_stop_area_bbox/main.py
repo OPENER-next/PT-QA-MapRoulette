@@ -52,6 +52,7 @@ challenge = mrcb.Challenge()
 for element in resultElements:
     if needsTask(element):
         bboxGeometry = mrcb.getElementGeometry(element)
+        geomCls = mrcb.Geometry.fromOverpassElement(element)
         print(bboxGeometry)
         mainFeature = mrcb.GeoFeature.withId(
             osmType="relation", 
