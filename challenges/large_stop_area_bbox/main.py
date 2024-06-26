@@ -1,7 +1,5 @@
 import sys, math
-#sys.path.append('shared')
-from pathlib import Path
-sys.path.append(str(Path(__file__).parent.parent.parent / "shared"))
+sys.path.append('shared')
 #from ..shared import challenge_builder as mrcb
 #import challenge_builder as mrcb
 import challenge_builder as mrcb
@@ -53,14 +51,15 @@ challenge = mrcb.Challenge()
 
 for element in resultElements:
     if needsTask(element):
-        #bboxGeometry = mrcb.getElementGeometry(element)
-        geomCls = mrcb.Geometry.fromOverpassElement(element, GeomType="Polygon")
-        #print(bboxGeometry)
+        bboxGeometry = mrcb.getElementGeometry(element)
+        geomCls = mrcb.Geometry.fromOverpassElement(element)
+        print(bboxGeometry)
         mainFeature = mrcb.GeoFeature.withId(
             osmType="relation", 
             osmId=element["id"],
-            geometry=geomCls, 
+            geometry=bboxGeometry, 
             properties={})
+        mainFeature.convertClosedStringToPolygon()
         t = mrcb.Task(
             mainFeature=mainFeature)
         challenge.addTask(t)

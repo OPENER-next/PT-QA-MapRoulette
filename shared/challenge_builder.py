@@ -12,11 +12,6 @@ class Geometry:
         self.type = type
         self.coordinates = coordinates
 
-    
-    @classmethod
-    def fromGeoJSON(cls, geoJSON):
-        return cls(geoJSON["type"], geoJSON["coordinates"])
-
     # A method that will take an overpass result element and extract the geometry from it depending on what kind of data it is
     # The type of the geometry can be given in the arguments, but will default be inferred from the coordinates
     # This element can be a lot of different things...
@@ -114,6 +109,21 @@ class GeoFeature:
     def __init__(self, geometry, properties = {}):
         self.geometry = geometry
         self.properties = properties
+        # infer the type of the geometry (Point, LineString, Polygon) from the coordinates
+        # if its just a list of 2 numbers, its a Point
+        # if its a list of lists of 2 numbers, its a LineString
+        # if its a list of lists of 2 numbers where start and end are the same, its a Polygon
+        if isinstance(geometry, list):
+            if isinstance(geometry[0], list):
+                if isinstance(geometry[0][0], list):
+                    self.geometryType = "Polygon"
+                else:
+                    self.geometryType = "LineString"
+            else:
+                self.geometryType = "Point"
+        else:
+            print(geometry)
+            raise ValueError("Invalid coordinates")
 
     @classmethod
     def withId(cls, osmType, osmId, geometry, properties):
@@ -124,7 +134,10 @@ class GeoFeature:
     def toGeoJSON(self):
         return {
             "type": "Feature",
-            "geometry": self.geometry.toGeoJSON(),
+            "geometry": {
+                "type": self.geometryType,
+                "coordinates": self.geometry
+            },
             "properties": self.properties
         }
 
