@@ -1,5 +1,6 @@
 import sys, math
-sys.path.append('shared')
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent.parent / "shared"))
 #from ..shared import challenge_builder as mrcb
 #import challenge_builder as mrcb
 import challenge_builder as mrcb
