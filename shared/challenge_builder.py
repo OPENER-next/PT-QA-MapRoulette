@@ -35,8 +35,14 @@ class Geometry:
             else:
                 raise ValueError("No handalable coordinates found for element")
         
+
         if GeomType == "Point":
-            return cls(GeomType, [element['lon'], element['lat']])
+            if 'geometry' in element:
+                return cls(GeomType, element['geometry']['coordinates'])
+            if 'center' in element:
+                return cls(GeomType, [element['center']['lon'], element['center']['lat']])
+            else:
+                return cls(GeomType, [element['lon'], element['lat']])
         elif 'bounds' in element:
             # The geometry that needs to be initialized changes depending on if the user specifically requested a certain format
             # A LineString is a list of lists of 2 numbers
@@ -113,17 +119,9 @@ class GeoFeature:
         # if its just a list of 2 numbers, its a Point
         # if its a list of lists of 2 numbers, its a LineString
         # if its a list of lists of 2 numbers where start and end are the same, its a Polygon
-        if isinstance(geometry, list):
-            if isinstance(geometry[0], list):
-                if isinstance(geometry[0][0], list):
-                    self.geometryType = "Polygon"
-                else:
-                    self.geometryType = "LineString"
-            else:
-                self.geometryType = "Point"
-        else:
-            print(geometry)
-            raise ValueError("Invalid coordinates")
+        if not isinstance(geometry, Geometry):
+            raise ValueError("geometry must be an instance of the Geometry class, got " + str(type(geometry)) + " instead")
+
 
     @classmethod
     def withId(cls, osmType, osmId, geometry, properties):
@@ -134,10 +132,7 @@ class GeoFeature:
     def toGeoJSON(self):
         return {
             "type": "Feature",
-            "geometry": {
-                "type": self.geometryType,
-                "coordinates": self.geometry
-            },
+            "geometry": self.geometry.toGeoJSON(),
             "properties": self.properties
         }
 

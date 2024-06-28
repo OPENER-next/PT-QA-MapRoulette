@@ -5,3 +5,4 @@ data.osm
 challenges/large_stop_area_bbox/large_stop_area_bbox.json
 challenges/stop_area_names_from_platform_names/stop_area_names_from_platform_names.json
 shared/creds.json
+*.json
