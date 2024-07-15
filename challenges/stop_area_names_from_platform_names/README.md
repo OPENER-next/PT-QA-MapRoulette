@@ -1,6 +1,6 @@
 # Add names to stop_areas by platform names
 
-This script gets all stop_areas without names from the overpass API. It then fetches every relation from the OSM API and checks if all platforms in this relation have the same name. If they do, this name is suggested to be added as the name for the whole stop_area.
+This script gets all stop_areas without names from the overpass API. In the query, a virtual OSM object is constructed with a "combined name" of all platforms of this stop_area. If they are different, the `name=`-tag of this new object will read `< multiple values found >`, and it will not be considered. If they are all the name, this name is written to the `name=`-tag and suggested to be added as the name for the whole stop_area.
 
 ## Maproulette Challenge Description
 
