@@ -1,8 +1,6 @@
 import sys, math
 from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent.parent / "shared"))
-#from ..shared import challenge_builder as mrcb
-#import challenge_builder as mrcb
 import challenge_builder as mrcb
 from geopy import distance
 
