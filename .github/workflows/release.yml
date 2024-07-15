@@ -43,32 +43,9 @@ jobs:
 
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v2
       with:
-        tag_name: "${{ env.DATE }}+${{ github.run_number }}"
-        release_name: "${{ env.DATE }}+${{ github.run_number }}"
+        name: "${{ env.DATE }}+${{ github.run_number }}"
         body: 'Release with JSON artifacts'
-        draft: false
-        prerelease: false
-
-    - name: Upload large_stop_area_bbox JSON
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: artifacts/large_stop_area_bbox.json
-        asset_name: large_stop_area_bbox.json
-        asset_content_type: application/json
-
-    - name: Upload stop_area_names_from_platform_names JSON
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: artifacts/stop_area_names_from_platform_names.json
-        asset_name: stop_area_names_from_platform_names.json
-        asset_content_type: application/json
+        token: ${{ secrets.GITHUB_TOKEN }}
+        files: artifacts/*.json
