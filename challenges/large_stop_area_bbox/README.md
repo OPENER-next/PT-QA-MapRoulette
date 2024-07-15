@@ -1,6 +1,6 @@
 # Überprüfung großer stop_area BoundingBoxen - Deutschland
 
-[Challenge description (GitHub)}
+This challenge checks the bbox size of all stop_area relations in germany and creates tasks to check on those that surpass a certain threshold value.
 
 ## Maproulette Challenge Description
 
@@ -14,7 +14,6 @@ In dieser Challenge werden dir einige Haltestellenrelationen gezeigt, die ungew�
 ## Maproulette Task Instruction
 
 ```
-
-
+Diese Haltestellenrelation ist ungewöhnlich groß. Sieh nach, ob nur die korrekten Elemente enthalten sind und verändere die Relation wenn nötig.
 ```
 
