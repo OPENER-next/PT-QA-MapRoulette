@@ -40,7 +40,7 @@ foreach {
   >> -> .ancestors;
   make myCustomElement
     ::id=min(id()),
-  	::geom=ancestors.gcat(geom());
+    ::geom=ancestors.gcat(geom());
   out bb;
 }
 """
