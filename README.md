@@ -8,11 +8,11 @@ Public transport quality assurance callenges for MapRoulette
 
 ## How to use the output of the scripts / this repository
 
-A GitHub Action executes the scripts and creates a release with the output files. You can download the files from the [releases page](https://github.com/wielandb/PT-QA-MapRoulette/releases).
+A GitHub Action executes the scripts and creates a release with the output files. You can download the files from the [releases page](https://github.com/OPENER-next/PT-QA-MapRoulette/releases).
 
-[![Release with JSON Artifacts](https://github.com/wielandb/PT-QA-MapRoulette/actions/workflows/release.yml/badge.svg)](https://github.com/wielandb/PT-QA-MapRoulette/actions/workflows/release.yml)
+[![Release with JSON Artifacts](https://github.com/OPENER-next/PT-QA-MapRoulette/actions/workflows/release.yml/badge.svg)](https://github.com/OPENER-next/PT-QA-MapRoulette/actions/workflows/release.yml)
 
 For usage with MapRoulette, it is recommended that you use the static url that will always point to the latest release.
 Theese URLs are currently:
-- https://github.com/wielandb/PT-QA-MapRoulette/releases/latest/download/large_stop_area_bbox.json
-- https://github.com/wielandb/PT-QA-MapRoulette/releases/latest/download/stop_area_names_from_platform_names.json
+- https://github.com/OPENER-next/PT-QA-MapRoulette/releases/latest/download/large_stop_area_bbox.json
+- https://github.com/OPENER-next/PT-QA-MapRoulette/releases/latest/download/stop_area_names_from_platform_names.json
