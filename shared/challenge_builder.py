@@ -110,7 +110,10 @@ class TagFix():
                              {"operation": "setTags", "data": self.tagsToSet},
                              {"operation": "unsetTags", "data": self.tagsToDelete}
                          ]
-                     }}]}
+                     }
+                    }
+                ]
+                }
 
 @dataclass
 class Task:
@@ -142,7 +145,7 @@ class Overpass:
     def __init__(self, overpass_url="https://overpass-api.de/api/interpreter"):
         self.overpass_url = overpass_url
 
-    def getElementsFromQuery(self, overpass_query):
+    def queryElements(self, overpass_query):
         response = requests.get(self.overpass_url, params={'data': overpass_query})
         if response.status_code != 200:
             raise ValueError("Invalid return data")

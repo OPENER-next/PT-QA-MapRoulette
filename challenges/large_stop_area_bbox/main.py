@@ -44,7 +44,7 @@ foreach {
 """
 
 op = mrcb.Overpass()
-resultElements = op.getElementsFromQuery(opQuery)
+resultElements = op.queryElements(opQuery)
 
 challenge = mrcb.Challenge()
 
