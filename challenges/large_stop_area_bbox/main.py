@@ -50,7 +50,7 @@ challenge = mrcb.Challenge()
 
 for element in resultElements:
     if needsTask(element):
-        geomCls = mrcb.Geometry.fromOverpassElement(element)
+        geomCls = mrcb.geoJSONGeometryFromOverpassElement(element, GeomType="Polygon")
         mainFeature = mrcb.GeoFeature.withId(
             osmType="relation", 
             osmId=element["id"],

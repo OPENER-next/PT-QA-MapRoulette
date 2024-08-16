@@ -5,80 +5,51 @@ import requests
 import geojson
 from turfpy.measurement import distance, bbox, centroid
 
-@dataclass
-class Geometry:
-    def __init__(self, type, coordinates):
-        self.type = type
-        self.coordinates = coordinates
-
-    @classmethod
-    def fromOverpassElement(cls, element, GeomType=None):
-        if GeomType is None:
-            if 'lat' in element or 'center' in element:
-                GeomType = "Point"
-            elif 'bounds' in element:
-                GeomType = "Polygon"
-            elif 'geometry' in element:
+def geoJSONGeometryFromOverpassElement(element, GeomType=None):
+    # returns a geojson depending on element; either Point(), LineString() or Polygon()
+    # frist, asses the geometry type we want to give back based on the element if ForceGeomType is None
+    if GeomType is None:
+        if 'lat' in element or 'center' in element:
+            GeomType = "Point"
+        elif 'bounds' in element:
+            GeomType = "Polygon"
+        elif 'geometry' in element:
+            if element['geometry']['type'] in ["Point", "LineString", "Polygon"]:
                 GeomType = element['geometry']['type']
             else:
                 raise ValueError("No handalable coordinates found for element")
-
-        if GeomType == "Point":
-            if 'geometry' in element:
-                return cls(GeomType, element['geometry']['coordinates'])
-            elif 'center' in element:
-                return cls(GeomType, [element['center']['lon'], element['center']['lat']])
-            else:
-                return cls(GeomType, [element['lon'], element['lat']])
-        elif GeomType == "LineString":
-            return cls(GeomType, [[point['lon'], point['lat']] for point in element['geometry']])
-        elif GeomType == "Polygon":
-            if 'bounds' in element:
-                return cls(GeomType, [
-                    [[element['bounds']['minlon'], element['bounds']['minlat']],
-                     [element['bounds']['minlon'], element['bounds']['maxlat']],
-                     [element['bounds']['maxlon'], element['bounds']['maxlat']],
-                     [element['bounds']['maxlon'], element['bounds']['minlat']],
-                     [element['bounds']['minlon'], element['bounds']['minlat']]]
-                ])
-            else:
-                return cls(GeomType, [[[point['lon'], point['lat']] for point in element['geometry']]])
-
-    def toGeoJSON(self):
-        if self.type == "Point":
-            return geojson.Point(self.coordinates)
-        elif self.type == "LineString":
-            return geojson.LineString(self.coordinates)
-        elif self.type == "Polygon":
-            return geojson.Polygon(self.coordinates)
-
-    def convertPolygonToClosedString(self):
-        if self.type != "Polygon":
-            raise ValueError("This function only works for Polygons")
-        self.type = "LineString"
-        self.coordinates = self.coordinates[0]
-
-    def convertClosedStringToPolygon(self):
-        if self.type != "LineString":
-            raise ValueError("This function only works for LineStrings")
-        self.type = "Polygon"
-        self.coordinates = [self.coordinates]
-
-    def getCenterPoint(self):
-        if self.type == "Point":
-            return self.coordinates
         else:
-            geojson_obj = self.toGeoJSON()
-            center = centroid(geojson_obj)
-            return center['geometry']['coordinates']
+            raise ValueError("No handalable coordinates found for element")
+    # now, create the geojson object
+    if GeomType == "Point":
+        if 'geometry' in element:
+            return geojson.Point(element['geometry']['coordinates'])
+        elif 'center' in element:
+            return geojson.Point([element['center']['lon'], element['center']['lat']])
+        else:
+            return geojson.Point([element['lon'], element['lat']])
+    elif GeomType == "LineString":
+        return geojson.LineString([[point['lon'], point['lat']] for point in element['geometry']])
+    elif GeomType == "Polygon":
+        if 'bounds' in element:
+            return geojson.Polygon([
+                [[element['bounds']['minlon'], element['bounds']['minlat']],
+                 [element['bounds']['minlon'], element['bounds']['maxlat']],
+                 [element['bounds']['maxlon'], element['bounds']['maxlat']],
+                 [element['bounds']['maxlon'], element['bounds']['minlat']],
+                 [element['bounds']['minlon'], element['bounds']['minlat']]]
+            ])
+        else:
+            return geojson.Polygon([[[point['lon'], point['lat']] for point in element['geometry']]])       
+
 
 @dataclass
 class GeoFeature:
     def __init__(self, geometry, properties={}):
         self.geometry = geometry
         self.properties = properties
-        if not isinstance(geometry, Geometry):
-            raise ValueError("geometry must be an instance of the Geometry class, got " + str(type(geometry)) + " instead")
+        if not isinstance(geometry, geojson.geometry.Geometry):
+            raise ValueError("geometry must be an instance of the geoJSON Geometry class, got " + str(type(geometry)) + " instead")
 
     @classmethod
     def withId(cls, osmType, osmId, geometry, properties):
@@ -86,7 +57,7 @@ class GeoFeature:
         return cls(geometry, properties)
 
     def toGeoJSON(self):
-        return geojson.Feature(geometry=self.geometry.toGeoJSON(), properties=self.properties)
+        return geojson.Feature(geometry=self.geometry, properties=self.properties)
 
 @dataclass
 class TagFix():
