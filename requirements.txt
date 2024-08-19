@@ -1,4 +1,3 @@
-geopy
 requests
 turfpy
 geojson
