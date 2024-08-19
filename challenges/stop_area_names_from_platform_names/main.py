@@ -33,7 +33,7 @@ resultElements = op.queryElements(opQuery)
 challenge = mrcb.Challenge()
 
 for element in resultElements:
-    centerPoint = mrcb.geoJSONGeometryFromOverpassElement(element, GeomType="Point")
+    centerPoint = mrcb.geoJSONGeometryFromOverpassElement(element, forceGeomType="Point")
     mainFeature = mrcb.GeoFeature.withId(
         osmType="relation", 
         osmId=element["id"],

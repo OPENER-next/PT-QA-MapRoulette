@@ -7,3 +7,4 @@ challenges/stop_area_names_from_platform_names/stop_area_names_from_platform_nam
 shared/creds.json
 *.json
 .venv/
+venv/

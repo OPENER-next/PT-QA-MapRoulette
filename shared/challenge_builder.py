@@ -5,32 +5,34 @@ import requests
 import geojson
 from turfpy.measurement import distance, bbox, centroid
 
-def geoJSONGeometryFromOverpassElement(element, GeomType=None):
+def geoJSONGeometryFromOverpassElement(element, forceGeomType=None):
     # returns a geojson depending on element; either Point(), LineString() or Polygon()
     # frist, asses the geometry type we want to give back based on the element if ForceGeomType is None
-    if GeomType is None:
+    if forceGeomType is None:
         if 'lat' in element or 'center' in element:
-            GeomType = "Point"
+            geomType = "Point"
         elif 'bounds' in element:
-            GeomType = "Polygon"
+            geomType = "Polygon"
         elif 'geometry' in element:
             if element['geometry']['type'] in ["Point", "LineString", "Polygon"]:
-                GeomType = element['geometry']['type']
+                geomType = element['geometry']['type']
             else:
                 raise ValueError("No handalable coordinates found for element")
         else:
             raise ValueError("No handalable coordinates found for element")
+    else:
+        geomType = forceGeomType
     # now, create the geojson object
-    if GeomType == "Point":
+    if geomType == "Point":
         if 'geometry' in element:
             return geojson.Point(element['geometry']['coordinates'])
         elif 'center' in element:
             return geojson.Point([element['center']['lon'], element['center']['lat']])
         else:
             return geojson.Point([element['lon'], element['lat']])
-    elif GeomType == "LineString":
+    elif geomType == "LineString":
         return geojson.LineString([[point['lon'], point['lat']] for point in element['geometry']])
-    elif GeomType == "Polygon":
+    elif geomType == "Polygon":
         if 'bounds' in element:
             return geojson.Polygon([
                 [[element['bounds']['minlon'], element['bounds']['minlat']],
