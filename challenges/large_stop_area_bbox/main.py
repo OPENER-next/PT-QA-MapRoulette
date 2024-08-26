@@ -14,8 +14,12 @@ def needsTask(e):
     # Every element looks like this:
     # {"type": "relation", "id": 4751, "bounds": {"minlat": 51.4922560, "minlon": 7.4171198, "maxlat": 51.4923844, "maxlon": 7.4176189 }},
     # An element needs a task if either the vertical or the horizontal bbox edge is longer than a predefined value in meters
+    print(e)
     max_distance = 1000
     # Calculate the length of the longitude difference of the bbox
+    if len(e['geometry']['coordinates']) == 1:
+        e['geometry']['coordinates'] = e['geometry']['coordinates'][0]
+
     e['bounds'] = {}
     e['bounds']['minlat'] = e['geometry']['coordinates'][0][1]
     e['bounds']['minlon'] = e['geometry']['coordinates'][0][0]
@@ -45,23 +49,22 @@ foreach {
   >> -> .ancestors;
   make myCustomElement
     ::id=min(id()),
-    ::geom=ancestors.gcat(geom());
+    ::geom=hull(ancestors.gcat(geom()));
   out bb;
 }
 """
 
 op = mrcb.Overpass()
-resultElements = op.queryElements(opQuery)
+resultElements = op.queryElementsAsGeoJSON(opQuery, forceGeomType="Polygon")
 
 challenge = mrcb.Challenge()
 
 for element in resultElements:
     if needsTask(element):
-        geomCls = mrcb.geoJSONGeometryFromOverpassElement(element, forceGeomType="Polygon")
         mainFeature = mrcb.GeoFeature.withId(
             osmType="relation", 
-            osmId=element["id"],
-            geometry=geomCls, 
+            osmId=element["properties"]["@id"],
+            geometry=element["geometry"], 
             properties={})
         t = mrcb.Task(
             mainFeature=mainFeature)

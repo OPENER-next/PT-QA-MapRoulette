@@ -8,6 +8,10 @@ from turfpy.measurement import distance, bbox, centroid
 def geoJSONGeometryFromOverpassElement(element, forceGeomType=None):
     # returns a geojson depending on element; either Point(), LineString() or Polygon()
     # frist, asses the geometry type we want to give back based on the element if ForceGeomType is None
+    if "tags" not in element:
+        element["tags"] = {}
+    element["tags"]["@type"] = element["type"]
+    element["tags"]["@id"] = element["id"]
     if forceGeomType is None:
         if 'lat' in element or 'center' in element:
             geomType = "Point"
@@ -25,24 +29,34 @@ def geoJSONGeometryFromOverpassElement(element, forceGeomType=None):
     # now, create the geojson object
     if geomType == "Point":
         if 'geometry' in element:
-            return geojson.Point(element['geometry']['coordinates'])
+            return geojson.Feature(geometry=geojson.Point(element['geometry']['coordinates']), properties=element['tags'])
         elif 'center' in element:
-            return geojson.Point([element['center']['lon'], element['center']['lat']])
+            return geojson.Feature(geometry=geojson.Point([element['center']['lon'], element['center']['lat']]), properties=element['tags'])
         else:
-            return geojson.Point([element['lon'], element['lat']])
+            return geojson.Feature(geometry=geojson.Point([element['lon'], element['lat']]), properties=element['tags'])
     elif geomType == "LineString":
-        return geojson.LineString([[point['lon'], point['lat']] for point in element['geometry']])
+        return geojson.Feature(geometry=geojson.LineString([[point['lon'], point['lat']] for point in element['geometry']]), properties=element['tags'])
     elif geomType == "Polygon":
         if 'bounds' in element:
-            return geojson.Polygon([
+            print("bounds im Element")
+            return geojson.Feature(geometry=geojson.Polygon([
                 [[element['bounds']['minlon'], element['bounds']['minlat']],
                  [element['bounds']['minlon'], element['bounds']['maxlat']],
                  [element['bounds']['maxlon'], element['bounds']['maxlat']],
                  [element['bounds']['maxlon'], element['bounds']['minlat']],
                  [element['bounds']['minlon'], element['bounds']['minlat']]]
-            ])
+            ]), properties=element['tags'])
+        if 'coordinates' in element['geometry']:
+            print("element: " + str(element))
+            if len(element['geometry']['coordinates']) == 1:
+                print("Elementgeometrie length 1")
+                return geojson.Feature(geometry=geojson.Polygon([element['geometry']['coordinates']]), properties=element['tags'])
+            print("Elementgeometrie length > 1")
+            print("Übergebene geometrie: " + str([element['geometry']['coordinates']]))
+            return geojson.Feature(geometry=geojson.Polygon([element['geometry']['coordinates']]), properties=element['tags'])
         else:
-            return geojson.Polygon([[[point['lon'], point['lat']] for point in element['geometry']]])       
+            print("Dictionarys mit lon und lat")
+            return geojson.Feature(geometry=geojson.Polygon([[[point['lon'], point['lat']] for point in element['geometry']]]), properties=element['tags'])
 
 
 @dataclass
@@ -56,6 +70,9 @@ class GeoFeature:
     @classmethod
     def withId(cls, osmType, osmId, geometry, properties):
         properties["@id"] = f"{osmType}/{osmId}"
+        # Fix polygons beeing not a 3-dimensional array
+        if geometry["type"] == "Polygon" and len(geometry["coordinates"]) != 1:
+            geometry["coordinates"] = [geometry["coordinates"]]
         return cls(geometry, properties)
 
     def toGeoJSON(self):
@@ -118,8 +135,11 @@ class Overpass:
     def __init__(self, overpass_url="https://overpass-api.de/api/interpreter"):
         self.overpass_url = overpass_url
 
-    def queryElements(self, overpass_query):
+    def queryElementsRaw(self, overpass_query):
         response = requests.get(self.overpass_url, params={'data': overpass_query})
         if response.status_code != 200:
             raise ValueError("Invalid return data")
         return response.json()["elements"]
+
+    def queryElementsAsGeoJSON(self, overpass_query, forceGeomType=None):
+        return [geoJSONGeometryFromOverpassElement(element, forceGeomType) for element in self.queryElementsRaw(overpass_query)]

@@ -28,21 +28,21 @@ foreach.stop_areas -> .stop_area {
 """
 
 op = mrcb.Overpass()
-resultElements = op.queryElements(opQuery)
+resultElements = op.queryElementsAsGeoJSON(opQuery)
 
 challenge = mrcb.Challenge()
 
 for element in resultElements:
-    centerPoint = mrcb.geoJSONGeometryFromOverpassElement(element, forceGeomType="Point")
+    #centerPoint = element
     mainFeature = mrcb.GeoFeature.withId(
         osmType="relation", 
-        osmId=element["id"],
-        geometry=centerPoint, 
+        osmId=element["properties"]["@id"],
+        geometry=element["geometry"], 
         properties={})
-    suggestedName = element["tags"]["name"]
+    suggestedName = element["properties"]["name"]
     cooperativeWork = mrcb.TagFix(
         osmType="relation", 
-        osmId=element["id"], 
+        osmId=element["properties"]["@id"], 
         tags={"name": suggestedName})
     t = mrcb.Task(
         mainFeature=mainFeature, 
