@@ -128,7 +128,6 @@ class Overpass:
             thisElementGeometry = geojson.LineString([[point['lon'], point['lat']] for point in element['geometry']])
         elif geomType == "Polygon":
             if 'bounds' in element:
-                print("bounds im Element")
                 thisElementGeometry=geojson.Polygon([
                     [[element['bounds']['minlon'], element['bounds']['minlat']],
                     [element['bounds']['minlon'], element['bounds']['maxlat']],
@@ -137,14 +136,9 @@ class Overpass:
                     [element['bounds']['minlon'], element['bounds']['minlat']]]
                 ])
             if 'coordinates' in element['geometry']:
-                print("element: " + str(element))
                 if len(element['geometry']['coordinates']) == 1:
-                    print("Elementgeometrie length 1")
                     thisElementGeometry = geojson.Polygon([element['geometry']['coordinates']])
-                print("Elementgeometrie length > 1")
-                print("Übergebene geometrie: " + str([element['geometry']['coordinates']]))
                 thisElementGeometry = geojson.Polygon([element['geometry']['coordinates']])
             else:
-                print("Dictionarys mit lon und lat")
                 thisElementGeometry=geojson.Polygon([[[point['lon'], point['lat']] for point in element['geometry']]])
         return (thisElementGeometry, thisElementProperties)

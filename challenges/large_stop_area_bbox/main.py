@@ -14,7 +14,6 @@ def needsTask(e):
     # Every element looks like this:
     # {"type": "relation", "id": 4751, "bounds": {"minlat": 51.4922560, "minlon": 7.4171198, "maxlat": 51.4923844, "maxlon": 7.4176189 }},
     # An element needs a task if either the vertical or the horizontal bbox edge is longer than a predefined value in meters
-    print(e)
     max_distance = 1000
     # Calculate the length of the longitude difference of the bbox
     if len(e['geometry']['coordinates']) == 1:
