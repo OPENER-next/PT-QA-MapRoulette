@@ -11,8 +11,6 @@ from geojson import Point
 # use this function for filtering things that overpass cannot filter, maybe by using a function from a different file that you specifically implemented for this task
 # if your overpass query already returns all elements that need to be fixed, make this function return True
 def needsTask(e):
-    # Every element looks like this:
-    # {"type": "relation", "id": 4751, "bounds": {"minlat": 51.4922560, "minlon": 7.4171198, "maxlat": 51.4923844, "maxlon": 7.4176189 }},
     # An element needs a task if either the vertical or the horizontal bbox edge is longer than a predefined value in meters
     max_distance = 1000
     # Calculate the length of the longitude difference of the bbox

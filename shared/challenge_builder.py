@@ -14,13 +14,19 @@ class GeoFeature:
         self.properties = properties
         if not isinstance(geometry, geojson.geometry.Geometry):
             raise ValueError("geometry must be an instance of the geoJSON Geometry class, got " + str(type(geometry)) + " instead")
+        # fix or raise errors for common geometry problems
+        if geometry.type == "Point" and len(geometry.coordinates) != 2:
+            geometry.coordinates = centroid(geometry).coordinates
+        if geometry.type == "LineString" and len(geometry.coordinates) < 2:
+            raise ValueError("LineString must have at least 2 points")
+        if geometry.type == "Polygon" and len(geometry.coordinates) != 1:
+            geometry.coordinates = [geometry.coordinates]
+        if geometry.type == "Polygon" and len(geometry.coordinates[0]) < 4:
+            raise ValueError("Polygon must have at least 4 points")
 
     @classmethod
     def withId(cls, osmType, osmId, geometry, properties):
         properties["@id"] = f"{osmType}/{osmId}"
-        # Fix polygons beeing not a 3-dimensional array
-        if geometry["type"] == "Polygon" and len(geometry["coordinates"]) != 1:
-            geometry["coordinates"] = [geometry["coordinates"]]
         return cls(geometry, properties)
 
     def toGeoJSON(self):
@@ -92,7 +98,8 @@ class Overpass:
     def queryElementsAsGeoJSON(self, overpass_query, forceGeomType=None):
         rawElements = self.queryElementsRaw(overpass_query)
         geometriesAndProperties = [(self.geoJSONGeometryFromOverpassElement(element, forceGeomType)) for element in rawElements]
-        return [geojson.Feature(geometry=g, properties=p) for g,p in geometriesAndProperties]
+        featureList = [geojson.Feature(geometry=g, properties=p) for g,p in geometriesAndProperties]
+        return featureList
 
     def geoJSONGeometryFromOverpassElement(self, element, forceGeomType=None):
         # returns a geojson depending on element; either Point(), LineString() or Polygon()

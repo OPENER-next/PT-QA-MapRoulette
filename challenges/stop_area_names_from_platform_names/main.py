@@ -33,7 +33,6 @@ resultElements = op.queryElementsAsGeoJSON(opQuery)
 challenge = mrcb.Challenge()
 
 for element in resultElements:
-    #centerPoint = element
     mainFeature = mrcb.GeoFeature.withId(
         osmType="relation", 
         osmId=element["properties"]["@id"],
