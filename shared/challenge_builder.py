@@ -12,9 +12,9 @@ class GeoFeature:
     def __init__(self, geometry, properties={}):
         self.geometry = geometry
         self.properties = properties
+        # fix or raise errors for common geometry problems
         if not isinstance(geometry, geojson.geometry.Geometry):
             raise ValueError("geometry must be an instance of the geoJSON Geometry class, got " + str(type(geometry)) + " instead")
-        # fix or raise errors for common geometry problems
         if geometry.type == "Point" and len(geometry.coordinates) != 2:
             geometry.coordinates = centroid(geometry).coordinates
         if geometry.type == "LineString" and len(geometry.coordinates) < 2:
