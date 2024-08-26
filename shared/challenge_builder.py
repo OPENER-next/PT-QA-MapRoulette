@@ -5,58 +5,6 @@ import requests
 import geojson
 from turfpy.measurement import distance, bbox, centroid
 
-def geoJSONGeometryFromOverpassElement(element, forceGeomType=None):
-    # returns a geojson depending on element; either Point(), LineString() or Polygon()
-    # frist, asses the geometry type we want to give back based on the element if ForceGeomType is None
-    if "tags" not in element:
-        element["tags"] = {}
-    element["tags"]["@type"] = element["type"]
-    element["tags"]["@id"] = element["id"]
-    if forceGeomType is None:
-        if 'lat' in element or 'center' in element:
-            geomType = "Point"
-        elif 'bounds' in element:
-            geomType = "Polygon"
-        elif 'geometry' in element:
-            if element['geometry']['type'] in ["Point", "LineString", "Polygon"]:
-                geomType = element['geometry']['type']
-            else:
-                raise ValueError("No handalable coordinates found for element")
-        else:
-            raise ValueError("No handalable coordinates found for element")
-    else:
-        geomType = forceGeomType
-    # now, create the geojson object
-    if geomType == "Point":
-        if 'geometry' in element:
-            return geojson.Feature(geometry=geojson.Point(element['geometry']['coordinates']), properties=element['tags'])
-        elif 'center' in element:
-            return geojson.Feature(geometry=geojson.Point([element['center']['lon'], element['center']['lat']]), properties=element['tags'])
-        else:
-            return geojson.Feature(geometry=geojson.Point([element['lon'], element['lat']]), properties=element['tags'])
-    elif geomType == "LineString":
-        return geojson.Feature(geometry=geojson.LineString([[point['lon'], point['lat']] for point in element['geometry']]), properties=element['tags'])
-    elif geomType == "Polygon":
-        if 'bounds' in element:
-            print("bounds im Element")
-            return geojson.Feature(geometry=geojson.Polygon([
-                [[element['bounds']['minlon'], element['bounds']['minlat']],
-                 [element['bounds']['minlon'], element['bounds']['maxlat']],
-                 [element['bounds']['maxlon'], element['bounds']['maxlat']],
-                 [element['bounds']['maxlon'], element['bounds']['minlat']],
-                 [element['bounds']['minlon'], element['bounds']['minlat']]]
-            ]), properties=element['tags'])
-        if 'coordinates' in element['geometry']:
-            print("element: " + str(element))
-            if len(element['geometry']['coordinates']) == 1:
-                print("Elementgeometrie length 1")
-                return geojson.Feature(geometry=geojson.Polygon([element['geometry']['coordinates']]), properties=element['tags'])
-            print("Elementgeometrie length > 1")
-            print("Übergebene geometrie: " + str([element['geometry']['coordinates']]))
-            return geojson.Feature(geometry=geojson.Polygon([element['geometry']['coordinates']]), properties=element['tags'])
-        else:
-            print("Dictionarys mit lon und lat")
-            return geojson.Feature(geometry=geojson.Polygon([[[point['lon'], point['lat']] for point in element['geometry']]]), properties=element['tags'])
 
 
 @dataclass
@@ -142,4 +90,57 @@ class Overpass:
         return response.json()["elements"]
 
     def queryElementsAsGeoJSON(self, overpass_query, forceGeomType=None):
-        return [geoJSONGeometryFromOverpassElement(element, forceGeomType) for element in self.queryElementsRaw(overpass_query)]
+        return [self.geoJSONGeometryFromOverpassElement(element, forceGeomType) for element in self.queryElementsRaw(overpass_query)]
+
+    def geoJSONGeometryFromOverpassElement(self, element, forceGeomType=None):
+        # returns a geojson depending on element; either Point(), LineString() or Polygon()
+        # frist, asses the geometry type we want to give back based on the element if ForceGeomType is None
+        if "tags" not in element:
+            element["tags"] = {}
+        element["tags"]["@type"] = element["type"]
+        element["tags"]["@id"] = element["id"]
+        if forceGeomType is None:
+            if 'lat' in element or 'center' in element:
+                geomType = "Point"
+            elif 'bounds' in element:
+                geomType = "Polygon"
+            elif 'geometry' in element:
+                if element['geometry']['type'] in ["Point", "LineString", "Polygon"]:
+                    geomType = element['geometry']['type']
+                else:
+                    raise ValueError("No handalable coordinates found for element")
+            else:
+                raise ValueError("No handalable coordinates found for element")
+        else:
+            geomType = forceGeomType
+        # now, create the geojson object
+        if geomType == "Point":
+            if 'geometry' in element:
+                return geojson.Feature(geometry=geojson.Point(element['geometry']['coordinates']), properties=element['tags'])
+            elif 'center' in element:
+                return geojson.Feature(geometry=geojson.Point([element['center']['lon'], element['center']['lat']]), properties=element['tags'])
+            else:
+                return geojson.Feature(geometry=geojson.Point([element['lon'], element['lat']]), properties=element['tags'])
+        elif geomType == "LineString":
+            return geojson.Feature(geometry=geojson.LineString([[point['lon'], point['lat']] for point in element['geometry']]), properties=element['tags'])
+        elif geomType == "Polygon":
+            if 'bounds' in element:
+                print("bounds im Element")
+                return geojson.Feature(geometry=geojson.Polygon([
+                    [[element['bounds']['minlon'], element['bounds']['minlat']],
+                    [element['bounds']['minlon'], element['bounds']['maxlat']],
+                    [element['bounds']['maxlon'], element['bounds']['maxlat']],
+                    [element['bounds']['maxlon'], element['bounds']['minlat']],
+                    [element['bounds']['minlon'], element['bounds']['minlat']]]
+                ]), properties=element['tags'])
+            if 'coordinates' in element['geometry']:
+                print("element: " + str(element))
+                if len(element['geometry']['coordinates']) == 1:
+                    print("Elementgeometrie length 1")
+                    return geojson.Feature(geometry=geojson.Polygon([element['geometry']['coordinates']]), properties=element['tags'])
+                print("Elementgeometrie length > 1")
+                print("Übergebene geometrie: " + str([element['geometry']['coordinates']]))
+                return geojson.Feature(geometry=geojson.Polygon([element['geometry']['coordinates']]), properties=element['tags'])
+            else:
+                print("Dictionarys mit lon und lat")
+                return geojson.Feature(geometry=geojson.Polygon([[[point['lon'], point['lat']] for point in element['geometry']]]), properties=element['tags'])
