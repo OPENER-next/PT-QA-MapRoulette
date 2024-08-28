@@ -133,16 +133,16 @@ class Overpass:
         # now, create the geojson object
         if geomType == "Point":
             if 'geometry' in element:
-                thisElementGeometry = geojson.Point(element['geometry']['coordinates'])
+                return geojson.Point(element['geometry']['coordinates'])
             elif 'center' in element:
-                thisElementGeometry = geojson.Point([element['center']['lon'], element['center']['lat']])
+                return geojson.Point([element['center']['lon'], element['center']['lat']])
             else:
-                thisElementGeometry = geojson.Point([element['lon'], element['lat']])
+                return geojson.Point([element['lon'], element['lat']])
         elif geomType == "LineString":
-            thisElementGeometry = geojson.LineString([[point['lon'], point['lat']] for point in element['geometry']])
+            return geojson.LineString([[point['lon'], point['lat']] for point in element['geometry']])
         elif geomType == "Polygon":
             if 'bounds' in element:
-                thisElementGeometry=geojson.Polygon([
+                return geojson.Polygon([
                     [[element['bounds']['minlon'], element['bounds']['minlat']],
                     [element['bounds']['minlon'], element['bounds']['maxlat']],
                     [element['bounds']['maxlon'], element['bounds']['maxlat']],
@@ -150,9 +150,7 @@ class Overpass:
                     [element['bounds']['minlon'], element['bounds']['minlat']]]
                 ])
             if 'coordinates' in element['geometry']:
-                if len(element['geometry']['coordinates']) != 1:
-                    element['geometry']['coordinates'] = [element['geometry']['coordinates']]
-                thisElementGeometry = geojson.Polygon(element['geometry']['coordinates'])
+                return geojson.Polygon([element['geometry']['coordinates']])
             else:
-                thisElementGeometry=geojson.Polygon([[[point['lon'], point['lat']] for point in element['geometry']]])
-        return thisElementGeometry
+                return geojson.Polygon([[[point['lon'], point['lat']] for point in element['geometry']]])
+        raise ValueError("No handalable coordinates found for element")
