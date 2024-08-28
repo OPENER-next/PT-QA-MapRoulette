@@ -97,11 +97,13 @@ class Overpass:
 
     def queryElementsAsGeoJSON(self, overpass_query, forceGeomType=None):
         rawElements = self.queryElementsRaw(overpass_query)
-        geometriesAndProperties = [(self.geoJSONGeometryFromOverpassElement(element, forceGeomType)) for element in rawElements]
-        featureList = [geojson.Feature(geometry=g, properties=p) for g,p in geometriesAndProperties]
+        featureList = []
+        for element in rawElements:
+            g, p = self.geoJSONGeometryAndPropertiesFromOverpassElement(element, forceGeomType)
+            featureList.append(geojson.Feature(geometry=g, properties=p))
         return featureList
 
-    def geoJSONGeometryFromOverpassElement(self, element, forceGeomType=None):
+    def geoJSONGeometryAndPropertiesFromOverpassElement(self, element, forceGeomType=None):
         # returns a geojson depending on element; either Point(), LineString() or Polygon()
         # frist, asses the geometry type we want to give back based on the element if ForceGeomType is None
         if "tags" not in element:
