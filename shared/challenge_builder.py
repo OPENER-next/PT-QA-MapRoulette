@@ -97,20 +97,25 @@ class Overpass:
 
     def queryElementsAsGeoJSON(self, overpass_query, forceGeomType=None):
         rawElements = self.queryElementsRaw(overpass_query)
-        featureList = []
-        for element in rawElements:
-            g, p = self.geoJSONGeometryAndPropertiesFromOverpassElement(element, forceGeomType)
-            featureList.append(geojson.Feature(geometry=g, properties=p))
+        featureList = list(map(lambda element: geojson.Feature(
+            geometry=self.geoJSONGeometryFromOverpassElement(element, forceGeomType),
+            properties=self.geoJSONPropertiesFromOverpassElement(element)
+        ), rawElements))
         return featureList
 
-    def geoJSONGeometryAndPropertiesFromOverpassElement(self, element, forceGeomType=None):
+
+    def geoJSONPropertiesFromOverpassElement(self, element):
+        if 'tags' in element:
+            tags = element['tags']
+        else:
+            tags = {}
+        tags["@type"] = element["type"]
+        tags["@id"] = element["id"]
+        return tags;            
+
+    def geoJSONGeometryFromOverpassElement(self, element, forceGeomType=None):
         # returns a geojson depending on element; either Point(), LineString() or Polygon()
         # frist, asses the geometry type we want to give back based on the element if ForceGeomType is None
-        if "tags" not in element:
-            element["tags"] = {}
-        element["tags"]["@type"] = element["type"]
-        element["tags"]["@id"] = element["id"]
-        thisElementProperties = element["tags"]
         if forceGeomType is None:
             if 'lat' in element or 'center' in element:
                 geomType = "Point"
@@ -145,9 +150,9 @@ class Overpass:
                     [element['bounds']['minlon'], element['bounds']['minlat']]]
                 ])
             if 'coordinates' in element['geometry']:
-                if len(element['geometry']['coordinates']) == 1:
-                    thisElementGeometry = geojson.Polygon([element['geometry']['coordinates']])
-                thisElementGeometry = geojson.Polygon([element['geometry']['coordinates']])
+                if len(element['geometry']['coordinates']) != 1:
+                    element['geometry']['coordinates'] = [element['geometry']['coordinates']]
+                thisElementGeometry = geojson.Polygon(element['geometry']['coordinates'])
             else:
                 thisElementGeometry=geojson.Polygon([[[point['lon'], point['lat']] for point in element['geometry']]])
-        return (thisElementGeometry, thisElementProperties)
+        return thisElementGeometry
