@@ -6,7 +6,6 @@ import geojson
 from turfpy.measurement import distance, bbox, centroid
 
 
-
 @dataclass
 class GeoFeature:
     def __init__(self, geometry, properties={}):
@@ -43,13 +42,13 @@ class TagFix():
             raise ValueError("tagsToDelete must be a list, e.g. ['tag1', 'tag2']")
         if not isinstance(self.tagsToSet, dict):
             raise ValueError("tagsToSet must be a dict e.g. {'tag1': 'value1', 'tag2': 'value2'}")
-        
+
     def toGeoJSON(self):
-        return {"meta": {"version": 2, "type": 1}, 
+        return {"meta": {"version": 2, "type": 1},
                 "operations": [
-                    {"operationType": "modifyElement", 
+                    {"operationType": "modifyElement",
                      "data": {
-                         "id": f"{self.osmType}/{self.osmId}",  
+                         "id": f"{self.osmType}/{self.osmId}",
                          "operations": [
                              {"operation": "setTags", "data": self.tagsToSet},
                              {"operation": "unsetTags", "data": self.tagsToDelete}
@@ -95,41 +94,33 @@ class Overpass:
             raise ValueError("Invalid return data")
         return response.json()["elements"]
 
-    def queryElementsAsGeoJSON(self, overpass_query, forceGeomType=None):
+    def queryElementsAsGeoJSON(self, overpass_query):
         rawElements = self.queryElementsRaw(overpass_query)
         featureList = list(map(lambda element: geojson.Feature(
-            geometry=self.geoJSONGeometryFromOverpassElement(element, forceGeomType),
+            geometry=self.geoJSONGeometryFromOverpassElement(element),
             properties=self.geoJSONPropertiesFromOverpassElement(element)
         ), rawElements))
         return featureList
 
 
     def geoJSONPropertiesFromOverpassElement(self, element):
-        if 'tags' in element:
-            tags = element['tags']
-        else:
-            tags = {}
+        tags = element.get('tags', {})
         tags["@type"] = element["type"]
         tags["@id"] = element["id"]
-        return tags;            
+        return tags;
 
-    def geoJSONGeometryFromOverpassElement(self, element, forceGeomType=None):
+    def geoJSONGeometryFromOverpassElement(self, element):
         # returns a geojson depending on element; either Point(), LineString() or Polygon()
-        # frist, asses the geometry type we want to give back based on the element if ForceGeomType is None
-        if forceGeomType is None:
-            if 'lat' in element or 'center' in element:
-                geomType = "Point"
-            elif 'bounds' in element:
-                geomType = "Polygon"
-            elif 'geometry' in element:
-                if element['geometry']['type'] in ["Point", "LineString", "Polygon"]:
-                    geomType = element['geometry']['type']
-                else:
-                    raise ValueError("No handalable coordinates found for element")
+        if 'lat' in element or 'center' in element:
+            geomType = "Point"
+        elif 'geometry' in element:
+            if element['geometry']['type'] in ["Point", "LineString", "Polygon"]:
+                geomType = element['geometry']['type']
             else:
                 raise ValueError("No handalable coordinates found for element")
         else:
-            geomType = forceGeomType
+            raise ValueError("No handalable coordinates found for element")
+
         # now, create the geojson object
         if geomType == "Point":
             if 'geometry' in element:
@@ -139,18 +130,16 @@ class Overpass:
             else:
                 return geojson.Point([element['lon'], element['lat']])
         elif geomType == "LineString":
-            return geojson.LineString([[point['lon'], point['lat']] for point in element['geometry']])
-        elif geomType == "Polygon":
-            if 'bounds' in element:
-                return geojson.Polygon([
-                    [[element['bounds']['minlon'], element['bounds']['minlat']],
-                    [element['bounds']['minlon'], element['bounds']['maxlat']],
-                    [element['bounds']['maxlon'], element['bounds']['maxlat']],
-                    [element['bounds']['maxlon'], element['bounds']['minlat']],
-                    [element['bounds']['minlon'], element['bounds']['minlat']]]
-                ])
             if 'coordinates' in element['geometry']:
-                return geojson.Polygon([element['geometry']['coordinates']])
+                return geojson.LineString(element['geometry']['coordinates'])
+            else:
+                return geojson.LineString([[point['lon'], point['lat']] for point in element['geometry']])
+        elif geomType == "Polygon":
+            if 'coordinates' in element['geometry']:
+                if len(element['geometry']['coordinates']) == 1:
+                    return geojson.Polygon(element['geometry']['coordinates'])
+                else:
+                    return geojson.Polygon([element['geometry']['coordinates']])
             else:
                 return geojson.Polygon([[[point['lon'], point['lat']] for point in element['geometry']]])
         raise ValueError("No handalable coordinates found for element")

@@ -1,5 +1,7 @@
 import sys
-sys.path.append('shared')
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent.parent / "shared"))
+from turfpy.measurement import center, bbox, bbox_polygon
 import challenge_builder as mrcb
 
 opQuery = """
@@ -13,7 +15,7 @@ foreach.stop_areas -> .stop_area {
   // and to get members of type relation (single > only returns ways and nodes)
   .stop_area >>;
   nwr._["public_transport"="platform"];
-  
+
   if (u(t["name"]) != "< multiple values found >" && u(t["name"]) != "") {
       make StopArea
       name=u(t["name"]),
@@ -21,8 +23,8 @@ foreach.stop_areas -> .stop_area {
       ::id=stop_area.u(id()),
       // group geometries into one
       ::geom=hull(gcat(geom()));
-      
-      out center tags;
+
+      out geom tags;
   }
 }
 """
@@ -33,20 +35,27 @@ resultElements = op.queryElementsAsGeoJSON(opQuery)
 challenge = mrcb.Challenge()
 
 for element in resultElements:
+    if element["geometry"]["type"] == "Polygon":
+        geometry=element["geometry"]
+    elif element["geometry"]["type"] == "LineString":
+        geometry=bbox_polygon(bbox(element["geometry"])).geometry
+    else:
+        geometry=center(element["geometry"]).geometry
+
     mainFeature = mrcb.GeoFeature.withId(
-        osmType="relation", 
+        osmType="relation",
         osmId=element["properties"]["@id"],
-        geometry=element["geometry"], 
+        geometry=geometry,
         properties={})
     suggestedName = element["properties"]["name"]
     cooperativeWork = mrcb.TagFix(
-        osmType="relation", 
-        osmId=element["properties"]["@id"], 
+        osmType="relation",
+        osmId=element["properties"]["@id"],
         tags={"name": suggestedName})
-    t = mrcb.Task(
-        mainFeature=mainFeature, 
-        additionalFeatures=[], 
+    task = mrcb.Task(
+        mainFeature=mainFeature,
+        additionalFeatures=[],
         cooperativeWork=cooperativeWork)
-    challenge.addTask(t)
+    challenge.addTask(task)
 
 challenge.saveToFile("stop_area_names_from_platform_names.json")
